@@ -1,47 +1,51 @@
-name: ci
-on:
-  push:
-    branches:
-      - 'main'
+# Enable when we have more robust branch protection
 
-jobs:
-  docker:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - image: opensign/opensign
-            dockerfile: apps/OpenSign/Dockerhubfile
-          - image: opensign/opensignserver
-            dockerfile: apps/OpenSignServer/Dockerhubfile
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - 
-        name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ matrix.image }}
-      -
-        name: Debug - List files opensign
-        run: ls -R apps/OpenSign/  # Adjust the path as needed
-      -
-        name: Debug - List files opensignserver
-        run: ls -R apps/OpenSignServer/  # Adjust the path as needed  
-      -
-        name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+# name: push-docker-images
+# on:
+#   push:
+#     branches:
+#       - 'master'
+#       - 'change-docker-workflow'
+
+# jobs:
+#   docker:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         include:
+#           - image: opensign/opensign
+#             dockerfile: apps/OpenSign/Dockerhubfile
+#           - image: opensign/opensignserver
+#             dockerfile: apps/OpenSignServer/Dockerhubfile
+#     steps:
+#       -
+#         name: Checkout
+#         uses: actions/checkout@v3
+#       -
+#         name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-region: ${{ env.AWS_REGION }}
+#           role-to-assume: ${{ vars.IAM_ROLE_ARN }}
+#           role-session-name: survey_tracker_opensign_deploy_${{ github.job }}
+
+#       - 
+#         name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v2
+
+#       - 
+#         name: Extract metadata (tags, labels) for Docker
+#         id: meta
+#         uses: docker/metadata-action@v4
+#         with:
+#           images: ${{ steps.login-ecr.outputs.registry }}/${{ matrix.image }}
+#       -
+#         name: Build and push
+#         uses: docker/build-push-action@v4
+#         with:
+#           context: .
+#           file: ${{ matrix.dockerfile }}
+#           push: true
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}

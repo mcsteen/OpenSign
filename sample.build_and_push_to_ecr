@@ -1,0 +1,17 @@
+#! /bin/bash
+
+AWS_REGION=
+AWS_ACCOUNT_ID=
+FRONTEND_REPO_NAME=
+BACKEND_REPO_NAME=
+
+# Build and push the docker image to ECR
+aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+docker build -t ${FRONTEND_REPO_NAME}:latest ./apps/OpenSign/
+docker tag ${FRONTEND_REPO_NAME}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO_NAME}:latest
+docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO_NAME}:latest
+
+docker build -t ${BACKEND_REPO_NAME}:latest ./apps/OpenSignServer/
+docker tag ${BACKEND_REPO_NAME}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO_NAME}:latest
+docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO_NAME}:latest
